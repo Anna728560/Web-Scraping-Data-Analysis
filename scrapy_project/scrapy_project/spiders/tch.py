@@ -1,6 +1,9 @@
+import time
+
 from scrapy.http import Response
 import scrapy
 from selenium import webdriver
+from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 
@@ -57,15 +60,20 @@ class TchSpider(scrapy.Spider):
 
     def get_technologies_block(self):
 
-        technologies_block = self.driver.find_element(By.CLASS_NAME, "toggle-block")
-        technologies = technologies_block.find_elements(By.CLASS_NAME, "label-skill")
+        try:
+            self.check_all_technologies_button()
+        except NoSuchElementException:
+            return None
+        finally:
+            technologies_block = self.driver.find_element(By.CLASS_NAME, "toggle-block")
+            technologies = technologies_block.find_elements(By.CLASS_NAME, "label-skill")
 
-        technology_list = []
+            technology_list = []
 
-        for technology in technologies:
-            technology_list.append(technology.text)
+            for technology in technologies:
+                technology_list.append(technology.text)
 
-        return technology_list
+            return technology_list
 
     def extract_posted_date(self):
         posted_date_element = self.driver.find_element(By.CLASS_NAME, "text-default-7")
@@ -80,3 +88,9 @@ class TchSpider(scrapy.Spider):
         company_name = company_name_element.text
 
         return company_name
+
+    def check_all_technologies_button(self):
+        all_tech_button = self.driver.find_element(
+            By.CSS_SELECTOR, "a.block-relative.link-icon.nowrap.w-100.text-center.js-toggle-btn"
+        )
+        all_tech_button.click()
