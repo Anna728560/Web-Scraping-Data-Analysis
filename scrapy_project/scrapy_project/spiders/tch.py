@@ -1,6 +1,3 @@
-from datetime import datetime
-import re
-
 from scrapy import Selector
 from scrapy.http import Response
 import scrapy
@@ -30,9 +27,12 @@ class TchSpider(scrapy.Spider):
                 "posted_date": self.extract_posted_date(response, tech),
             }
 
-    def parse_technologies_block(self, response: Response, tech: Selector):
+    def open_job_page(self, response: Response, tech: Selector):
         detailed_url = tech.css("h2>a::attr(href)").get()
         self.driver.get(response.urljoin(detailed_url))
+
+    def parse_technologies_block(self, response: Response, tech: Selector):
+        self.open_job_page(response, tech)
 
         technologies_block = self.driver.find_element(By.CLASS_NAME, "toggle-block")
         technologies = technologies_block.find_elements(By.CLASS_NAME, "label-skill")
@@ -45,8 +45,7 @@ class TchSpider(scrapy.Spider):
         return technology_list
 
     def extract_posted_date(self, response: Response, tech: Selector):
-        detailed_url = tech.css("h2>a::attr(href)").get()
-        self.driver.get(response.urljoin(detailed_url))
+        self.open_job_page(response, tech)
 
         posted_date_element = self.driver.find_element(By.CLASS_NAME, "text-default-7")
         posted_date_text = posted_date_element.text.replace("Вакансія від ", "")
