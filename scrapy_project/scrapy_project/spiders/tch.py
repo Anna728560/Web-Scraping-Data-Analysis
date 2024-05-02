@@ -1,5 +1,3 @@
-import time
-
 from scrapy.http import Response
 import scrapy
 from selenium import webdriver
