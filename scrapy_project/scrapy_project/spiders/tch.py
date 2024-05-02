@@ -7,6 +7,22 @@ from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 
+MONTHS = {
+    "січня": "1",
+    "лютого": "2",
+    "березня": "3",
+    "квітня": "4",
+    "травня": "5",
+    "червня": "6",
+    "липня": "7",
+    "серпня": "8",
+    "вересня": "9",
+    "жовтня": "10",
+    "листопада": "11",
+    "грудня": "12"
+}
+
+
 class TchSpider(scrapy.Spider):
     """
     This spider scrapes job details from work.ua.
@@ -77,9 +93,9 @@ class TchSpider(scrapy.Spider):
 
     def extract_posted_date(self):
         posted_date_element = self.driver.find_element(By.CLASS_NAME, "text-default-7")
-        posted_date_text = posted_date_element.text.replace("Вакансія від ", "")
+        posted_date_text = posted_date_element.text.replace("Вакансія від ", "").split(" ")
 
-        return posted_date_text
+        return f"{posted_date_text[2]}-{int(MONTHS[posted_date_text[1]]):02d}-{int(posted_date_text[0]):02d}"
 
     def get_company_name(self):
         company_name_element = self.driver.find_element(
